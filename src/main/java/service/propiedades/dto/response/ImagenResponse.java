@@ -19,7 +19,7 @@ public record ImagenResponse(
                 .url(urlBase+imagen.getKeyR2())
                 .orden(imagen.getOrden())
                 .esPortada(imagen.getEsPortada())
-                .build()
+                .build();
     }
 
 }
