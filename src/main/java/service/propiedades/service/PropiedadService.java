@@ -46,6 +46,7 @@ public class PropiedadService {
     private final PropiedadRepository propiedadRepository;
     private final UsuarioClientService usuarioClientService;
     private final StringRedisTemplate redisTemplate;
+    private final PropiedadImagenService propiedadImagenService;
     private final PropiedadImagenRepository propiedadImagenRepository;
 
     @Value("${R2_URL}")
@@ -77,15 +78,12 @@ public class PropiedadService {
 
     }
 
-    public PropiedadDetalleResponse obtenerDetalle(UUID id, ContextoUsuario usuario, HttpServletRequest servletRequest) {
-        Propiedad propiedadPorId = buscarPorId(id);
+    public PropiedadDetalleResponse obtenerDetalle(UUID propiedadId, ContextoUsuario usuario, HttpServletRequest servletRequest) {
+        Propiedad propiedadPorId = buscarPorId(propiedadId);
 
-        publicarVistaSiAplica(id, propiedadPorId.getAgenteId(), usuario, servletRequest);
+        publicarVistaSiAplica(propiedadId, propiedadPorId.getAgenteId(), usuario, servletRequest);
 
-        List<ImagenResponse> propiedadImagenList = propiedadImagenRepository.findByPropiedadIdOrderByOrden(id).stream()
-                .map(I -> ImagenResponse.from(I, urlBase))
-                .toList();
-
+        List<ImagenResponse> propiedadImagenList = propiedadImagenService.listarPorPropiedad(propiedadId);
 
         UsuarioInternalResponse usuarioInternalResponse = usuarioClientService.buscarAgente(propiedadPorId.getAgenteId());
 
@@ -202,7 +200,6 @@ public class PropiedadService {
     }
 
 
-    //interno
     public Propiedad buscarPorId(UUID id) {
         return propiedadRepository.findById(id).orElseThrow(() ->
                 new PropiedadNoEncontradaException("Propiedad no encontrada")
