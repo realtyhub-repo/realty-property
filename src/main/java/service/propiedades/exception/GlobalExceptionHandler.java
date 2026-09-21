@@ -27,6 +27,21 @@ public class GlobalExceptionHandler {
         return construirRespuesta(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
+    @ExceptionHandler(ErrorAlmacenamientoException.class)
+    public ResponseEntity<ErrorResponse> handleErrorAlmacenamientoException(ErrorAlmacenamientoException ex){
+        return construirRespuesta(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
+    @ExceptionHandler(PortadaDuplicadaException.class)
+    public  ResponseEntity<ErrorResponse> handlePortadaDuplicadaException(PortadaDuplicadaException ex){
+        return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(ImagenNoEncontradaException.class)
+    public ResponseEntity<ErrorResponse> handleImagenNoEncontradaException(ImagenNoEncontradaException ex){
+        return construirRespuesta(HttpStatus.NOT_FOUND,ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> construirRespuesta(HttpStatus status, String mensaje){
         ErrorResponse error = new ErrorResponse(mensaje, status.value(), LocalDateTime.now());
         return ResponseEntity.status(status).body(error);

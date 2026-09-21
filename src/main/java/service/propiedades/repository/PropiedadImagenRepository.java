@@ -1,6 +1,9 @@
 package service.propiedades.repository;
 
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import service.propiedades.entity.PropiedadImagen;
 
 import java.util.List;
@@ -10,4 +13,9 @@ public interface PropiedadImagenRepository extends JpaRepository<service.propied
 
     List<PropiedadImagen> findByPropiedadIdOrderByOrden(UUID id);
     List<PropiedadImagen> findByPropiedadIdInAndEsPortadaTrue(List<UUID> id);
+
+    @Modifying
+    @Query("UPDATE PropiedadImagen p SET p.esPortada = false WHERE p.propiedadId = :propiedadId AND p.esPortada = true")
+    void desmarcarPortadaActual(@Param("propiedadId") UUID propiedadId);
+
 }
