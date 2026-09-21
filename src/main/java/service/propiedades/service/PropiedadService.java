@@ -139,9 +139,9 @@ public class PropiedadService {
 
     }
 
-    public PropiedadResponse actualizar(UUID id, RolUsuario rol, UUID solicitanteId, ActualizarPropiedadRequest request){
+    public PropiedadResponse actualizar(UUID propiedadId, RolUsuario rol, UUID solicitanteId, ActualizarPropiedadRequest request){
 
-        Propiedad propiedad = buscarPorId(id);
+        Propiedad propiedad = buscarPorId(propiedadId);
 
         boolean esDueno = propiedad.getAgenteId().equals(solicitanteId);
         boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
@@ -174,13 +174,13 @@ public class PropiedadService {
     }
 
 
-    public void cambiarEstadoManual(UUID id, EstadoComercial nuevo, RolUsuario rol, UUID solicitanteId){
+    public void cambiarEstadoManual(UUID propiedadId, EstadoComercial nuevo, RolUsuario rol, UUID solicitanteId){
 
 
         if (rol == RolUsuario.CLIENTE)
             throw new AccesoNoAutorizadoException("acceso no autorizado");
 
-        Propiedad propiedadPorId = buscarPorId(id);
+        Propiedad propiedadPorId = buscarPorId(propiedadId);
 
         boolean esDueno = propiedadPorId.getAgenteId().equals(solicitanteId);
         boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
@@ -188,7 +188,7 @@ public class PropiedadService {
         if (!esDueno && !esAdmin)
             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
 
-        cambiarEstado(id,nuevo);
+        cambiarEstado(propiedadId,nuevo);
 
     }
 

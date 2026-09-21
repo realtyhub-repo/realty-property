@@ -1,6 +1,7 @@
 package service.propiedades.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +31,12 @@ public class PropiedadImagenService {
     private final PropiedadImagenRepository imagenRepository;
     private final PropiedadService propiedadService;
 
-    public List<UploadUrlResponse> generarUrlSubida(UUID propiedadId, RolUsuario rol, UUID solicitanteId, List<String> nombresArchivo){
+    public List<UploadUrlResponse> generarUrlSubida(UUID propiedadId, RolUsuario rol, UUID solicitanteId, List<String> nombresArchivo) {
 
         if (rol == RolUsuario.CLIENTE)
             throw new AccesoNoAutorizadoException("acceso no autorizado");
 
-        Propiedad propiedadPorId =propiedadService.buscarPorId(propiedadId);
+        Propiedad propiedadPorId = propiedadService.buscarPorId(propiedadId);
 
         boolean esDueno = propiedadPorId.getAgenteId().equals(solicitanteId);
         boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
@@ -44,14 +45,14 @@ public class PropiedadImagenService {
             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
 
 
-       return nombresArchivo.stream()
-               .map(nombreArchivo->generarUploadUrlResponse(propiedadId,nombreArchivo))
-               .toList();
+        return nombresArchivo.stream()
+                .map(nombreArchivo -> generarUploadUrlResponse(propiedadId, nombreArchivo))
+                .toList();
 
     }
 
 
-    public List<ImagenResponse> confirmarImagenes(UUID propiedadId, RolUsuario rol, UUID solicitanteId, List<ConfirmarImagenRequest> requests){
+    public List<ImagenResponse> confirmarImagenes(UUID propiedadId, RolUsuario rol, UUID solicitanteId, List<ConfirmarImagenRequest> requests) {
 
         Propiedad propiedad = propiedadService.buscarPorId(propiedadId);
 
@@ -89,8 +90,12 @@ public class PropiedadImagenService {
     }
 
     @Transactional
-    public void marcarPortada(UUID propiedadId, UUID imagenId, RolUsuario rol, UUID solicitanteId){
-        Propiedad propiedad = propiedadService.buscarPorId(propiedadId);
+    public void marcarPortada( UUID imagenId, RolUsuario rol, UUID solicitanteId) {
+        PropiedadImagen imagen = imagenRepository.findById(imagenId).orElseThrow(() ->
+                new ImagenNoEncontradaException("Imagen no encontrada")
+        );
+
+        Propiedad propiedad = propiedadService.buscarPorId(imagen.getPropiedadId());
 
         boolean esDueno = propiedad.getAgenteId().equals(solicitanteId);
         boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
@@ -98,44 +103,39 @@ public class PropiedadImagenService {
         if (!esDueno && !esAdmin)
             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
 
-        imagenRepository.desmarcarPortadaActual(propiedadId);
+        if (imagen.getEsPortada()) return;
 
-        PropiedadImagen imagen = imagenRepository.findById(imagenId).orElseThrow(()->
-                new ImagenNoEncontradaException("Imagen no encontrada")
-                );
-
+        imagenRepository.desmarcarPortadaActual(propiedad.getId());
         imagen.setEsPortada(true);
-        imagenRepository.save(imagen);
-
     }
 
-    public void eliminar (UUID imagenId, RolUsuario rol, UUID solicitanteId){
-        PropiedadImagen imagen = imagenRepository.findById(imagenId).orElseThrow(()->
+    public void eliminar(UUID imagenId, RolUsuario rol, UUID solicitanteId) {
+        PropiedadImagen imagen = imagenRepository.findById(imagenId).orElseThrow(() ->
                 new ImagenNoEncontradaException("Imagen no encontrada")
         );
 
-         Propiedad propiedad = propiedadService.buscarPorId(imagen.getPropiedadId());
+        Propiedad propiedad = propiedadService.buscarPorId(imagen.getPropiedadId());
 
-         boolean esDueno = propiedad.getAgenteId().equals(solicitanteId);
-         boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
+        boolean esDueno = propiedad.getAgenteId().equals(solicitanteId);
+        boolean esAdmin = rol == RolUsuario.ADMINISTRADOR_CENTRAL;
 
-         if (!esDueno && !esAdmin)
-             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
+        if (!esDueno && !esAdmin)
+            throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
 
-         s3Service.eliminarImagen(imagen.getKeyR2());
-         imagenRepository.delete(imagen);
+        s3Service.eliminarImagen(imagen.getKeyR2());
+        imagenRepository.delete(imagen);
 
-     }
+    }
 
-    public List<ImagenResponse> listarPorPropiedad(UUID propiedadId){
+    public List<ImagenResponse> listarPorPropiedad(UUID propiedadId) {
         return imagenRepository.findByPropiedadIdOrderByOrden(propiedadId).stream()
                 .map(I -> ImagenResponse.from(I, urlBase))
                 .toList();
     }
 
-    private UploadUrlResponse generarUploadUrlResponse(UUID propiedadId, String nombreArchivo){
+    private UploadUrlResponse generarUploadUrlResponse(UUID propiedadId, @NonNull String nombreArchivo) {
         String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf('.'));
-        String key = String.format("propiedades/%s/%s.%s",propiedadId, UUID.randomUUID(),extension);
+        String key = String.format("propiedades/%s/%s.%s", propiedadId, UUID.randomUUID(), extension);
 
         String urlPresigned = s3Service.generarUrlPresigned(key, Duration.ofMinutes(15));
         return UploadUrlResponse.builder()
@@ -146,4 +146,4 @@ public class PropiedadImagenService {
     }
 
 
-    }
+}
