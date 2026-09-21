@@ -6,10 +6,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import service.user.entity.RolUsuario;
-import service.user.exception.ContextoUsuarioInvalidoException;
-import service.user.security.ContextoUsuario;
-import service.user.security.UsuarioActual;
+import service.propiedades.dto.internal.RolUsuario;
+import service.propiedades.exception.ContextoUsuarioInvalidoException;
+
 
 import java.util.UUID;
 
