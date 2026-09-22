@@ -3,6 +3,7 @@ package service.propiedades.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,8 +22,9 @@ import service.propiedades.service.PropiedadService;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
-@RequestMapping("/property")
+@RequestMapping("/propiedades")
 @RequiredArgsConstructor
 public class PropiedadController {
 
@@ -30,7 +32,7 @@ public class PropiedadController {
 
     @PostMapping
     public ResponseEntity<PropiedadResponse> crear(@Valid  @RequestBody CrearPropiedadRequest request,
-                                                   @UsuarioActual @NonNull ContextoUsuario usuario){
+                                                   @UsuarioActual  ContextoUsuario usuario){
 
         PropiedadResponse response = propiedadService.crear(usuario.rol(),usuario.userId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -38,7 +40,7 @@ public class PropiedadController {
 
     @GetMapping
     public ResponseEntity<Page<PropiedadResponse>> listarPropiedades(
-            @RequestParam(required = false)PropiedadFiltros filtros,
+            @ModelAttribute PropiedadFiltros filtros,
             Pageable pageable
             ){
 

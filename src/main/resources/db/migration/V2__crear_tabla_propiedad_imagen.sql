@@ -5,7 +5,8 @@ CREATE TABLE propiedad_imagen (
                                   key_r2 character varying(255) NOT NULL,
                                   orden integer NOT NULL,
                                   propiedad_id uuid NOT NULL,
-                                  CONSTRAINT propiedad_imagen_pkey PRIMARY KEY (id)
+                                  CONSTRAINT propiedad_imagen_pkey PRIMARY KEY (id),
+                                  CONSTRAINT uk_propiedad_imagen_key_r2 UNIQUE (key_r2)
 );
 
 CREATE UNIQUE INDEX idx_una_portada_por_propiedad

@@ -23,13 +23,13 @@ public class S3Service {
     @Value("${R2_BUCKET_NAME}")
     private String bucketName;
 
-    public String generarUrlPresigned(String key, Duration expiration) {
+    public String generarUrlPresigned(String key, Duration expiration, String contentType) {
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(expiration)
                 .putObjectRequest(builder -> builder
                         .bucket(bucketName)
                         .key(key)
-                        .contentType("image/jpeg")
+                        .contentType(contentType)
                         .build())
                 .build();
 

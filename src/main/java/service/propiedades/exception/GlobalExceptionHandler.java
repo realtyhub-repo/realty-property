@@ -42,6 +42,21 @@ public class GlobalExceptionHandler {
         return construirRespuesta(HttpStatus.NOT_FOUND,ex.getMessage());
     }
 
+    @ExceptionHandler(ImagenDuplicadaException.class)
+    public ResponseEntity<ErrorResponse> handleImagenDuplicadaException(ImagenDuplicadaException ex){
+        return construirRespuesta(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        return construirRespuesta(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado");
+    }
+
+    @ExceptionHandler(FormatoNoValidoException.class)
+    public ResponseEntity<ErrorResponse> handleFormatoNoValidoException(FormatoNoValidoException ex){
+        return construirRespuesta(HttpStatus.BAD_REQUEST,ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> construirRespuesta(HttpStatus status, String mensaje){
         ErrorResponse error = new ErrorResponse(mensaje, status.value(), LocalDateTime.now());
         return ResponseEntity.status(status).body(error);
