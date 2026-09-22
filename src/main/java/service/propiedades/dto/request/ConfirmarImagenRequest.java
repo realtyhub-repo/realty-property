@@ -10,9 +10,6 @@ public record ConfirmarImagenRequest(
         @NotBlank
         String key,
 
-        @NotNull
-        Integer orden,
-
         boolean esPortada
 
 ) {

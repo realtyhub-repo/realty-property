@@ -23,6 +23,7 @@ import service.propiedades.dto.response.UsuarioInternalResponse;
 import service.propiedades.entity.EstadoComercial;
 import service.propiedades.entity.Propiedad;
 import service.propiedades.entity.PropiedadImagen;
+import service.propiedades.entity.TipoPropiedad;
 import service.propiedades.exception.AccesoNoAutorizadoException;
 import service.propiedades.exception.PropiedadNoEncontradaException;
 import service.propiedades.repository.PropiedadImagenRepository;
@@ -89,7 +90,10 @@ public class PropiedadService {
 
     }
 
-    public Page<PropiedadResponse> listar(Pageable pageable, @NonNull PropiedadFiltros propiedadFiltros) {
+    public Page<PropiedadResponse> listar(Pageable pageable,  PropiedadFiltros propiedadFiltros) {
+
+        TipoPropiedad propiedadFiltro1 = propiedadFiltros==null?null:propiedadFiltros.tipoPropiedad();
+
         Specification<Propiedad> spec = Specification
                 .where(PropiedadSpecifications.tienePropiedad(propiedadFiltros.tipoPropiedad()))
                 .and(PropiedadSpecifications.tieneModalidad(propiedadFiltros.modalidad()))

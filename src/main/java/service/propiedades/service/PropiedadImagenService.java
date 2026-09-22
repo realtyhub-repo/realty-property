@@ -3,6 +3,7 @@ package service.propiedades.service;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import service.propiedades.dto.internal.RolUsuario;
@@ -11,20 +12,19 @@ import service.propiedades.dto.response.ImagenResponse;
 import service.propiedades.dto.response.UploadUrlResponse;
 import service.propiedades.entity.Propiedad;
 import service.propiedades.entity.PropiedadImagen;
-import service.propiedades.exception.AccesoNoAutorizadoException;
-import service.propiedades.exception.ErrorAlmacenamientoException;
-import service.propiedades.exception.ImagenNoEncontradaException;
+import service.propiedades.exception.*;
 import service.propiedades.repository.PropiedadImagenRepository;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class PropiedadImagenService {
 
-    @Value("")
+    @Value("${R2_URL}")
     private String urlBase;
 
     private final S3Service s3Service;
@@ -51,7 +51,7 @@ public class PropiedadImagenService {
 
     }
 
-
+    @Transactional
     public List<ImagenResponse> confirmarImagenes(UUID propiedadId, RolUsuario rol, UUID solicitanteId, List<ConfirmarImagenRequest> requests) {
 
         Propiedad propiedad = propiedadService.buscarPorId(propiedadId);
@@ -72,17 +72,29 @@ public class PropiedadImagenService {
         if (cantidadPortadas == 1) {
             imagenRepository.desmarcarPortadaActual(propiedadId);
         }
+        int ordenBase = imagenRepository.obtenerOrdenMaximo(propiedadId) + 1;
 
-        List<PropiedadImagen> imagenes = requests.stream()
-                .map(request -> PropiedadImagen.builder()
-                        .propiedadId(propiedadId)
-                        .keyR2(request.key())
-                        .orden(request.orden())
-                        .esPortada(request.esPortada())
-                        .build())
+        List<PropiedadImagen> imagenes = IntStream.range(0, requests.size())
+                .mapToObj(i->{
+                    ConfirmarImagenRequest request = requests.get(i);
+                    return PropiedadImagen.builder()
+                            .propiedadId(propiedadId)
+                            .keyR2(request.key())
+                            .orden(ordenBase+i)
+                            .esPortada(request.esPortada())
+                            .build();
+
+                })
                 .toList();
 
-        List<PropiedadImagen> guardadas = imagenRepository.saveAll(imagenes);
+
+        List<PropiedadImagen> guardadas;
+
+        try {
+            guardadas =  imagenRepository.saveAll(imagenes);
+        }catch (DataIntegrityViolationException e){
+            throw new ImagenDuplicadaException("Una o más imágenes ya fueron registradas");
+        }
 
         return guardadas.stream()
                 .map(imagen -> ImagenResponse.from(imagen, urlBase))
@@ -137,13 +149,28 @@ public class PropiedadImagenService {
         String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf('.'));
         String key = String.format("propiedades/%s/%s.%s", propiedadId, UUID.randomUUID(), extension);
 
-        String urlPresigned = s3Service.generarUrlPresigned(key, Duration.ofMinutes(15));
+        String contentType = obtenerContentType(nombreArchivo);
+
+        String urlPresigned = s3Service.generarUrlPresigned(key, Duration.ofMinutes(15), contentType);
         return UploadUrlResponse.builder()
                 .key(key)
                 .uploadUrl(urlPresigned)
                 .build();
 
     }
+    private @NonNull String obtenerContentType(String nombreArchivo){
+        String extension = nombreArchivo
+                .substring(nombreArchivo.lastIndexOf('.')+1)
+                .toLowerCase();
 
+        return switch (extension){
+            case "jpg","jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "webp" -> "image/webp";
+            default -> throw new FormatoNoValidoException(
+                    "Formato de imagen no permitido"
+            );
+        };
+    }
 
 }

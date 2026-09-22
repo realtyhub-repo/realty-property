@@ -18,4 +18,7 @@ public interface PropiedadImagenRepository extends JpaRepository<service.propied
     @Query("UPDATE PropiedadImagen p SET p.esPortada = false WHERE p.propiedadId = :propiedadId AND p.esPortada = true")
     void desmarcarPortadaActual(@Param("propiedadId") UUID propiedadId);
 
+    @Query("SELECT COALESCE(MAX(p.orden), -1) FROM PropiedadImagen p WHERE p.propiedadId = :propiedadId")
+    int obtenerOrdenMaximo(@Param("propiedadId") UUID propiedadId);
+
 }

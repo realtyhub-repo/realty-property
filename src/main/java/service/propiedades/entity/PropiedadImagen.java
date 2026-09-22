@@ -23,7 +23,7 @@ public class PropiedadImagen {
     @Column(nullable = false, name = "propiedad_id")
     private UUID propiedadId;
 
-    @Column(nullable = false, name = "key_r2")
+    @Column(nullable = false,unique = true, name = "key_r2")
     private String keyR2;
 
     @Column(nullable = false)
