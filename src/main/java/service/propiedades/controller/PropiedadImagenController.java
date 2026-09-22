@@ -55,7 +55,7 @@ public class PropiedadImagenController {
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
-    @PutMapping("/imagenes/{imagenId}")
+    @DeleteMapping("/imagenes/{imagenId}")
     public ResponseEntity<Void> eliminarImagen(@PathVariable UUID imagenId,
                                                @UsuarioActual ContextoUsuario usuario
     ){
