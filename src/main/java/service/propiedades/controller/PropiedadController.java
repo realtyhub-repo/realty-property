@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.propiedades.dto.internal.PropiedadFiltros;
+import service.propiedades.dto.internal.RolUsuario;
 import service.propiedades.dto.request.ActualizarPropiedadRequest;
 import service.propiedades.dto.request.CambiarEstadoRequest;
 import service.propiedades.dto.request.CrearPropiedadRequest;
@@ -52,10 +53,14 @@ public class PropiedadController {
     @GetMapping("/{id}")
     public ResponseEntity<PropiedadDetalleResponse> obtenerDetalles(@PathVariable UUID id,
                                                                     HttpServletRequest servletRequest,
-                                                                    @UsuarioActual ContextoUsuario contextoUsuario
-                                                                    ){
+                                                                    @RequestHeader(value = "X-User-Id", required = false) UUID userId,
+                                                                    @RequestHeader(value = "X-User-Role", required = false) RolUsuario userRole ){
 
-        return  ResponseEntity.ok(propiedadService.obtenerDetalle(id,contextoUsuario, servletRequest));
+        ContextoUsuario contexto = (userId != null && userRole != null)
+                ? new ContextoUsuario(userId, userRole)
+                : null;
+
+        return  ResponseEntity.ok(propiedadService.obtenerDetalle(id,contexto, servletRequest));
     }
 
     @PutMapping("/{id}")

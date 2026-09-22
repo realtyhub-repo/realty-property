@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import service.propiedades.dto.request.ConfirmarImagenRequest;
+import service.propiedades.dto.request.GenerarUrlsSubidaRequest;
 import service.propiedades.dto.response.ImagenResponse;
 import service.propiedades.dto.response.UploadUrlResponse;
 import service.propiedades.security.ContextoUsuario;
@@ -24,10 +25,10 @@ public class PropiedadImagenController {
     @PostMapping("/propiedades/{id}/imagenes/upload-urls")
     public ResponseEntity<List<UploadUrlResponse>> generarUls(@PathVariable UUID id,
                                                               @UsuarioActual ContextoUsuario usuario,
-                                                              @RequestBody List<String> nombresArchivos
-    ) {
+                                                              @RequestBody GenerarUrlsSubidaRequest request
+                                                              ) {
 
-        List<UploadUrlResponse> uploadUrlResponses = imagenService.generarUrlSubida(id, usuario.rol(), usuario.userId(), nombresArchivos);
+        List<UploadUrlResponse> uploadUrlResponses = imagenService.generarUrlSubida(id, usuario.rol(), usuario.userId(),request.nombresArchivo() );
 
         return ResponseEntity.ok(uploadUrlResponses);
     }

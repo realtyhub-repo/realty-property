@@ -92,8 +92,6 @@ public class PropiedadService {
 
     public Page<PropiedadResponse> listar(Pageable pageable,  PropiedadFiltros propiedadFiltros) {
 
-        TipoPropiedad propiedadFiltro1 = propiedadFiltros==null?null:propiedadFiltros.tipoPropiedad();
-
         Specification<Propiedad> spec = Specification
                 .where(PropiedadSpecifications.tienePropiedad(propiedadFiltros.tipoPropiedad()))
                 .and(PropiedadSpecifications.tieneModalidad(propiedadFiltros.modalidad()))
@@ -219,6 +217,7 @@ public class PropiedadService {
 
         Boolean propiedadVista = redisTemplate.opsForValue()
                 .setIfAbsent(key, Instant.now().toString(), Duration.ofMinutes(30));
+                log.info(key);
 
         if (Boolean.TRUE.equals(propiedadVista)) {
             log.info("evento publicado");

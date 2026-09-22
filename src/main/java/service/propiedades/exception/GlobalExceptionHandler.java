@@ -2,11 +2,14 @@ package service.propiedades.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import service.propiedades.dto.internal.ErrorResponse;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -55,6 +58,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FormatoNoValidoException.class)
     public ResponseEntity<ErrorResponse> handleFormatoNoValidoException(FormatoNoValidoException ex){
         return construirRespuesta(HttpStatus.BAD_REQUEST,ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationErros(MethodArgumentNotValidException ex){
+        String mensaje = ex.getBindingResult().getAllErrors().stream()
+                .map(ObjectError::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+        return construirRespuesta(HttpStatus.BAD_REQUEST,mensaje);
     }
 
     private ResponseEntity<ErrorResponse> construirRespuesta(HttpStatus status, String mensaje){
