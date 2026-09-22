@@ -22,24 +22,24 @@ public class PropiedadImagenController {
     private final PropiedadImagenService imagenService;
 
     @PostMapping("/propiedades/{id}/imagenes/upload-urls")
-    public ResponseEntity<List<UploadUrlResponse>> generarUls(@PathVariable UUID propiedadId,
+    public ResponseEntity<List<UploadUrlResponse>> generarUls(@PathVariable UUID id,
                                                               @UsuarioActual ContextoUsuario usuario,
                                                               @RequestBody List<String> nombresArchivos
     ) {
 
-        List<UploadUrlResponse> uploadUrlResponses = imagenService.generarUrlSubida(propiedadId, usuario.rol(), usuario.userId(), nombresArchivos);
+        List<UploadUrlResponse> uploadUrlResponses = imagenService.generarUrlSubida(id, usuario.rol(), usuario.userId(), nombresArchivos);
 
         return ResponseEntity.ok(uploadUrlResponses);
     }
 
     @PostMapping("/propiedades/{id}/imagenes/confirmar")
-    public ResponseEntity<List<ImagenResponse>> confirmarImagenes(@PathVariable UUID propiedadId,
+    public ResponseEntity<List<ImagenResponse>> confirmarImagenes(@PathVariable UUID id,
                                                                   @UsuarioActual ContextoUsuario usuario,
                                                                   @RequestBody List<ConfirmarImagenRequest> imagenRequests) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 imagenService.confirmarImagenes(
-                        propiedadId,
+                        id,
                         usuario.rol(),
                         usuario.userId(),
                         imagenRequests));
