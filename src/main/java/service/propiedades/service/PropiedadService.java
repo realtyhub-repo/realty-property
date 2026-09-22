@@ -46,7 +46,6 @@ public class PropiedadService {
     private final PropiedadRepository propiedadRepository;
     private final UsuarioClientService usuarioClientService;
     private final StringRedisTemplate redisTemplate;
-    private final PropiedadImagenService propiedadImagenService;
     private final PropiedadImagenRepository propiedadImagenRepository;
 
     @Value("${R2_URL}")
@@ -72,8 +71,6 @@ public class PropiedadService {
 
         Propiedad propiedadGuardada = propiedadRepository.save(propiedadBuild);
 
-        UsuarioInternalResponse usuarioInternalResponse = usuarioClientService.buscarAgente(idSolicitante);
-
         return PropiedadResponse.from(propiedadGuardada, null);
 
     }
@@ -83,8 +80,9 @@ public class PropiedadService {
 
         publicarVistaSiAplica(propiedadId, propiedadPorId.getAgenteId(), usuario, servletRequest);
 
-        List<ImagenResponse> propiedadImagenList = propiedadImagenService.listarPorPropiedad(propiedadId);
-
+        List<ImagenResponse> propiedadImagenList = propiedadImagenRepository.findByPropiedadIdOrderByOrden(propiedadId).stream()
+                .map(I -> ImagenResponse.from(I, urlBase))
+                .toList();
         UsuarioInternalResponse usuarioInternalResponse = usuarioClientService.buscarAgente(propiedadPorId.getAgenteId());
 
         return PropiedadDetalleResponse.from(propiedadPorId, usuarioInternalResponse.nombre(), propiedadImagenList);

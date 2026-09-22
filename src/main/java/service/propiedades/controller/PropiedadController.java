@@ -57,23 +57,23 @@ public class PropiedadController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PropiedadResponse> actualizar(@PathVariable UUID propiedadId,
+    public ResponseEntity<PropiedadResponse> actualizar(@PathVariable UUID id,
                                            @UsuarioActual @NonNull ContextoUsuario usuario,
                                            @Valid @RequestBody ActualizarPropiedadRequest request
                                            ){
 
-        PropiedadResponse response = propiedadService.actualizar(propiedadId,usuario.rol(),usuario.userId(),request);
+        PropiedadResponse response = propiedadService.actualizar(id,usuario.rol(),usuario.userId(),request);
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/estado")
-    public ResponseEntity<Void> cambiarEstado(@PathVariable UUID propiedadId,
+    public ResponseEntity<Void> cambiarEstado(@PathVariable UUID id,
                                               @UsuarioActual ContextoUsuario contextoUsuario,
                                               @Valid  @RequestBody CambiarEstadoRequest estadoRequest
                                               ){
 
-        propiedadService.cambiarEstadoManual(propiedadId,estadoRequest.nuevoEstado(),contextoUsuario.rol(),contextoUsuario.userId());
+        propiedadService.cambiarEstadoManual(id,estadoRequest.nuevoEstado(),contextoUsuario.rol(),contextoUsuario.userId());
         return ResponseEntity.noContent().build();
     }
 
