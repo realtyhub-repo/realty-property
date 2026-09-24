@@ -21,6 +21,8 @@ public record PropiedadDetalleResponse(
         BigDecimal precio,
         String direccion,
         String ciudad,
+        Double latitud,
+        Double longitud,
         TipoPropiedad tipoPropiedad,
         Modalidad modalidad,
         EstadoComercial estadoComercial,
@@ -41,6 +43,8 @@ public record PropiedadDetalleResponse(
                 .descripcion(propiedad.getDescripcion())
                 .precio(propiedad.getPrecio())
                 .direccion(propiedad.getDireccion())
+                .latitud(propiedad.getLatitud())
+                .longitud(propiedad.getLongitud())
                 .ciudad(propiedad.getCiudad())
                 .tipoPropiedad(propiedad.getTipoPropiedad())
                 .modalidad(propiedad.getModalidad())

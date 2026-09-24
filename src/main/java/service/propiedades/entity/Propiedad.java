@@ -38,6 +38,12 @@ public class Propiedad {
     @Column(nullable = false)
     private String ciudad;
 
+    @Column(nullable = false)
+    private Double latitud;
+
+    @Column(nullable = false)
+    private Double longitud;
+
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false, name = "tipo_propiedad")
     private TipoPropiedad tipoPropiedad;

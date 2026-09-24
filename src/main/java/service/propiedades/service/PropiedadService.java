@@ -63,6 +63,8 @@ public class PropiedadService {
                 .precio(request.precio())
                 .direccion(request.direccion())
                 .ciudad(request.ciudad())
+                .latitud(request.latitud())
+                .longitud(request.longitud())
                 .tipoPropiedad(request.tipoPropiedad())
                 .modalidad(request.modalidad())
                 .estadoComercial(EstadoComercial.DISPONIBLE)
@@ -163,6 +165,12 @@ public class PropiedadService {
 
         if (request.ciudad() != null)
             propiedad.setCiudad(request.ciudad());
+
+        if (request.latitud()!=null)
+            propiedad.setLatitud(request.latitud());
+
+        if (request.longitud()!=null)
+            propiedad.setLongitud(request.longitud());
 
         if (request.caracteristicas() != null)
             propiedad.setCaracteristicas(request.caracteristicas());
