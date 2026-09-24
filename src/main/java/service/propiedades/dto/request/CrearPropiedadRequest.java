@@ -32,6 +32,16 @@ public record CrearPropiedadRequest(
         @Size(max = 100)
         String ciudad,
 
+        @DecimalMin(value = "-90.0")
+        @DecimalMax(value = "90.0")
+        @NotNull
+        Double latitud,
+
+        @DecimalMin(value = "-180.0")
+        @DecimalMax(value = "180.0")
+        @NotNull
+        Double longitud,
+
         @NotNull
         TipoPropiedad tipoPropiedad,
 

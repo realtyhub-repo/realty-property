@@ -1,8 +1,6 @@
 package service.propiedades.dto.request;
 
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
 
 import java.math.BigDecimal;
@@ -26,6 +24,16 @@ public record ActualizarPropiedadRequest(
 
         @Size(max = 100)
         String ciudad,
+
+        @DecimalMin(value = "-90.0")
+        @DecimalMax(value = "90.0")
+        @NotNull
+        Double latitud,
+
+        @DecimalMin(value = "-180.0")
+        @DecimalMax(value = "180.0")
+        @NotNull
+        Double longitud,
 
         Map<String, Object> caracteristicas
 
