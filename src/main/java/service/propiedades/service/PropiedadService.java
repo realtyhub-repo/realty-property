@@ -16,10 +16,7 @@ import service.propiedades.dto.internal.PropiedadFiltros;
 import service.propiedades.dto.internal.RolUsuario;
 import service.propiedades.dto.request.ActualizarPropiedadRequest;
 import service.propiedades.dto.request.CrearPropiedadRequest;
-import service.propiedades.dto.response.ImagenResponse;
-import service.propiedades.dto.response.PropiedadDetalleResponse;
-import service.propiedades.dto.response.PropiedadResponse;
-import service.propiedades.dto.response.UsuarioInternalResponse;
+import service.propiedades.dto.response.*;
 import service.propiedades.entity.EstadoComercial;
 import service.propiedades.entity.Propiedad;
 import service.propiedades.entity.PropiedadImagen;
@@ -214,6 +211,17 @@ public class PropiedadService {
         );
     }
 
+
+    public PropiedadCoordenadasResponse encontrarCoordenadas(UUID id){
+        Propiedad propiedad = propiedadRepository.findById(id).orElseThrow(()->
+                new PropiedadNoEncontradaException("Propiedad no encontrada")
+                );
+
+        return PropiedadCoordenadasResponse.builder()
+                .latitud(propiedad.getLatitud())
+                .longitud(propiedad.getLongitud())
+                .build();
+    }
 
     //interno
     private void publicarVistaSiAplica(UUID propiedadId, UUID agenteId, ContextoUsuario usuario, HttpServletRequest request) {
