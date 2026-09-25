@@ -218,6 +218,7 @@ public class PropiedadService {
                 );
 
         return PropiedadCoordenadasResponse.builder()
+                .estadoComercial(propiedad.getEstadoComercial())
                 .latitud(propiedad.getLatitud())
                 .longitud(propiedad.getLongitud())
                 .build();
