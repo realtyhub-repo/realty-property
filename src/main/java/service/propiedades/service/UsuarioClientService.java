@@ -15,7 +15,7 @@ public class UsuarioClientService {
 
     public UsuarioInternalResponse buscarAgente(UUID agenteId){
         return restClient.get()
-                .uri("/usuario/internal/users/{id}", agenteId)
+                .uri("/internal/usuario/detalle/{id}", agenteId)
                 .retrieve()
                 .body(UsuarioInternalResponse.class);
 
