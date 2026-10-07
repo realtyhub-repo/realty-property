@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import service.propiedades.dto.internal.FormatoImagen;
+import service.propiedades.dto.internal.ImagenInvalida;
 import service.propiedades.dto.internal.RolUsuario;
 import service.propiedades.dto.request.ConfirmarImagenRequest;
 import service.propiedades.dto.response.ImagenResponse;
@@ -16,7 +18,9 @@ import service.propiedades.exception.*;
 import service.propiedades.repository.PropiedadImagenRepository;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
@@ -43,6 +47,8 @@ public class PropiedadImagenService {
 
         if (!esDueno && !esAdmin)
             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
+
+        validarFormatos(nombresArchivo);
 
 
         return nombresArchivo.stream()
@@ -146,7 +152,7 @@ public class PropiedadImagenService {
     }
 
     private UploadUrlResponse generarUploadUrlResponse(UUID propiedadId, @NonNull String nombreArchivo) {
-        String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf('.'));
+        String extension = nombreArchivo.substring(nombreArchivo.lastIndexOf('.')+1);
         String key = String.format("propiedades/%s/%s.%s", propiedadId, UUID.randomUUID(), extension);
 
         String contentType = obtenerContentType(nombreArchivo);
@@ -158,19 +164,29 @@ public class PropiedadImagenService {
                 .build();
 
     }
-    private @NonNull String obtenerContentType(String nombreArchivo){
-        String extension = nombreArchivo
-                .substring(nombreArchivo.lastIndexOf('.')+1)
-                .toLowerCase();
 
-        return switch (extension){
-            case "jpg","jpeg" -> "image/jpeg";
-            case "png" -> "image/png";
-            case "webp" -> "image/webp";
-            default -> throw new FormatoNoValidoException(
-                    "Formato de imagen no permitido"
-            );
-        };
+    private void  validarFormatos(List<String> nombresArchivos) {
+        List<ImagenInvalida> invalidas = new ArrayList<>();
+
+
+        for (int i = 0; i < nombresArchivos.size(); i++) {
+            String nombre = nombresArchivos.get(i);
+            Optional<FormatoImagen> formato = FormatoImagen.desdeNombreArchivo(nombre);
+
+            if (formato.isEmpty()) {
+                invalidas.add(new ImagenInvalida(i, nombre));
+            }
+        }
+
+        if (!invalidas.isEmpty()) {
+            throw new FormatoImagenNoSoportadoException(invalidas);
+        }
+    }
+
+    private @NonNull String obtenerContentType(String nombreArchivo){
+        return FormatoImagen.desdeNombreArchivo(nombreArchivo)
+                .orElseThrow()
+                .getContentType();
     }
 
 }
