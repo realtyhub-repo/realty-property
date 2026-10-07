@@ -22,12 +22,7 @@ import service.propiedades.entity.Modalidad;
 import service.propiedades.entity.Propiedad;
 import service.propiedades.entity.PropiedadImagen;
 import service.propiedades.entity.TipoPropiedad;
-import service.propiedades.exception.AccesoNoAutorizadoException;
-import service.propiedades.exception.ErrorAlmacenamientoException;
-import service.propiedades.exception.FormatoNoValidoException;
-import service.propiedades.exception.ImagenDuplicadaException;
-import service.propiedades.exception.ImagenNoEncontradaException;
-import service.propiedades.exception.PropiedadNoEncontradaException;
+import service.propiedades.exception.*;
 import service.propiedades.repository.PropiedadImagenRepository;
 
 import java.math.BigDecimal;
@@ -206,7 +201,7 @@ class PropiedadImagenServiceTest {
     void generarUrlSubida_conFormatoNoPermitido_lanzaFormatoNoValidoYNoGeneraUrl() {
         when(propiedadService.buscarPorId(propiedadId)).thenReturn(propiedad);
 
-        assertThrows(FormatoNoValidoException.class,
+        assertThrows(FormatoImagenNoSoportadoException.class,
                 () -> imagenService.generarUrlSubida(propiedadId, RolUsuario.AGENTE, agenteId, List.of("documento.pdf")));
 
         verifyNoInteractions(s3Service);
@@ -216,7 +211,7 @@ class PropiedadImagenServiceTest {
     void generarUrlSubida_conArchivoSinExtension_lanzaFormatoNoValido() {
         when(propiedadService.buscarPorId(propiedadId)).thenReturn(propiedad);
 
-        assertThrows(FormatoNoValidoException.class,
+        assertThrows(FormatoImagenNoSoportadoException.class,
                 () -> imagenService.generarUrlSubida(propiedadId, RolUsuario.AGENTE, agenteId, List.of("foto")));
 
         verifyNoInteractions(s3Service);

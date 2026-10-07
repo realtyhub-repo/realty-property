@@ -1,6 +1,7 @@
 package service.propiedades.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -55,10 +56,7 @@ public class GlobalExceptionHandler {
         return construirRespuesta(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error inesperado");
     }
 
-    @ExceptionHandler(FormatoNoValidoException.class)
-    public ResponseEntity<ErrorResponse> handleFormatoNoValidoException(FormatoNoValidoException ex){
-        return construirRespuesta(HttpStatus.BAD_REQUEST,ex.getMessage());
-    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationErros(MethodArgumentNotValidException ex){
@@ -66,6 +64,14 @@ public class GlobalExceptionHandler {
                 .map(ObjectError::getDefaultMessage)
                 .collect(Collectors.joining(", "));
         return construirRespuesta(HttpStatus.BAD_REQUEST,mensaje);
+    }
+
+    @ExceptionHandler(FormatoImagenNoSoportadoException.class)
+    public ProblemDetail manejarFormatoNoSoportado(FormatoImagenNoSoportadoException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
+        problema.setTitle("Formato de imagen no soportado");
+        problema.setProperty("imagenesInvalidas", ex.getImagenesInvalidas());
+        return problema;
     }
 
     private ResponseEntity<ErrorResponse> construirRespuesta(HttpStatus status, String mensaje){
