@@ -1,0 +1,1 @@
+ALTER TABLE propiedad ALTER COLUMN descripcion TYPE varchar(2000);

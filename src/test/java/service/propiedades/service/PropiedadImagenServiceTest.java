@@ -237,10 +237,10 @@ class PropiedadImagenServiceTest {
     void confirmarImagenes_conMasDeUnaPortada_lanzaErrorYNoGuarda() {
         when(propiedadService.buscarPorId(propiedadId)).thenReturn(propiedad);
         List<ConfirmarImagenRequest> requests = List.of(
-                ConfirmarImagenRequest.builder().key("k1").esPortada(true).build(),
-                ConfirmarImagenRequest.builder().key("k2").esPortada(true).build());
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/k1").esPortada(true).build(),
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/k2").esPortada(true).build());
 
-        assertThrows(ErrorAlmacenamientoException.class,
+        assertThrows(PortadaMultipleException.class,
                 () -> imagenService.confirmarImagenes(propiedadId, RolUsuario.AGENTE, agenteId, requests));
 
         verify(imagenRepository, never()).saveAll(anyList());
@@ -254,8 +254,8 @@ class PropiedadImagenServiceTest {
         when(imagenRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         List<ConfirmarImagenRequest> requests = List.of(
-                ConfirmarImagenRequest.builder().key("propiedades/a.jpg").esPortada(true).build(),
-                ConfirmarImagenRequest.builder().key("propiedades/b.jpg").esPortada(false).build());
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/a.jpg").esPortada(true).build(),
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/b.jpg").esPortada(false).build());
 
         List<ImagenResponse> resultado = imagenService.confirmarImagenes(
                 propiedadId, RolUsuario.AGENTE, agenteId, requests);
@@ -265,16 +265,16 @@ class PropiedadImagenServiceTest {
 
         List<PropiedadImagen> guardadas = imagenesCaptor.getValue();
         assertEquals(2, guardadas.size());
-        assertEquals("propiedades/a.jpg", guardadas.get(0).getKeyR2());
+        assertEquals("propiedades/"+propiedadId+"/a.jpg", guardadas.get(0).getKeyR2());
         assertEquals(3, guardadas.get(0).getOrden());
         assertTrue(guardadas.get(0).getEsPortada());
-        assertEquals("propiedades/b.jpg", guardadas.get(1).getKeyR2());
+        assertEquals("propiedades/"+propiedadId+"/b.jpg", guardadas.get(1).getKeyR2());
         assertEquals(4, guardadas.get(1).getOrden());
         assertFalse(guardadas.get(1).getEsPortada());
         assertEquals(propiedadId, guardadas.get(0).getPropiedadId());
 
         assertEquals(2, resultado.size());
-        assertEquals(URL_BASE + "propiedades/a.jpg", resultado.get(0).url());
+        assertEquals(URL_BASE + "propiedades/"+propiedadId+"/a.jpg", resultado.get(0).url());
         assertEquals(3, resultado.get(0).orden());
         assertTrue(resultado.get(0).esPortada());
     }
@@ -287,8 +287,8 @@ class PropiedadImagenServiceTest {
         when(imagenRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         List<ConfirmarImagenRequest> requests = List.of(
-                ConfirmarImagenRequest.builder().key("propiedades/a.jpg").esPortada(false).build(),
-                ConfirmarImagenRequest.builder().key("propiedades/b.jpg").esPortada(false).build());
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/a.jpg").esPortada(false).build(),
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/b.jpg").esPortada(false).build());
 
         imagenService.confirmarImagenes(propiedadId, RolUsuario.AGENTE, agenteId, requests);
 
@@ -305,7 +305,7 @@ class PropiedadImagenServiceTest {
         when(imagenRepository.saveAll(anyList())).thenAnswer(inv -> inv.getArgument(0));
 
         List<ConfirmarImagenRequest> requests = List.of(
-                ConfirmarImagenRequest.builder().key("propiedades/a.jpg").esPortada(false).build());
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/a.jpg").esPortada(false).build());
 
         List<ImagenResponse> resultado = imagenService.confirmarImagenes(
                 propiedadId, RolUsuario.ADMINISTRADOR_CENTRAL, otroUsuarioId, requests);
@@ -320,7 +320,7 @@ class PropiedadImagenServiceTest {
         when(imagenRepository.saveAll(anyList())).thenThrow(new DataIntegrityViolationException("key duplicada"));
 
         List<ConfirmarImagenRequest> requests = List.of(
-                ConfirmarImagenRequest.builder().key("propiedades/a.jpg").esPortada(false).build());
+                ConfirmarImagenRequest.builder().key("propiedades/"+propiedadId+"/a.jpg").esPortada(false).build());
 
         assertThrows(ImagenDuplicadaException.class,
                 () -> imagenService.confirmarImagenes(propiedadId, RolUsuario.AGENTE, agenteId, requests));

@@ -26,7 +26,7 @@ public class Propiedad {
     @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 2000)
     private String descripcion;
 
     @Column(precision = 15, scale = 0, nullable = false)
