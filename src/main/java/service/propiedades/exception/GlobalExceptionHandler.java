@@ -1,12 +1,17 @@
 package service.propiedades.exception;
 
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import service.propiedades.dto.internal.ErrorResponse;
 
 import java.time.LocalDateTime;
@@ -48,7 +53,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ImagenDuplicadaException.class)
     public ResponseEntity<ErrorResponse> handleImagenDuplicadaException(ImagenDuplicadaException ex){
-        return construirRespuesta(HttpStatus.BAD_REQUEST, ex.getMessage());
+        return construirRespuesta(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)
@@ -73,6 +78,27 @@ public class GlobalExceptionHandler {
         problema.setProperty("imagenesInvalidas", ex.getImagenesInvalidas());
         return problema;
     }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class,
+            HttpMessageNotReadableException.class,
+            MissingRequestHeaderException.class})
+    public ResponseEntity<ErrorResponse> handleRequestInvalida(Exception ex) {
+        return construirRespuesta(HttpStatus.BAD_REQUEST, "Solicitud inválida");
+    }
+
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<ErrorResponse> handleMethodValidation(HandlerMethodValidationException ex) {
+        String mensaje = ex.getAllErrors().stream()
+                .map(MessageSourceResolvable::getDefaultMessage)
+                .collect(Collectors.joining(", "));
+        return construirRespuesta(HttpStatus.BAD_REQUEST, mensaje);
+    }
+
+    @ExceptionHandler(PortadaMultipleException.class)
+    public ResponseEntity<ErrorResponse> handlePortadaMultipleException(PortadaMultipleException ex){
+        return construirRespuesta(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
 
     private ResponseEntity<ErrorResponse> construirRespuesta(HttpStatus status, String mensaje){
         ErrorResponse error = new ErrorResponse(mensaje, status.value(), LocalDateTime.now());

@@ -1,6 +1,8 @@
 package service.propiedades.controller;
 
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class PropiedadImagenController {
     @PostMapping("/propiedades/{id}/imagenes/upload-urls")
     public ResponseEntity<List<UploadUrlResponse>> generarUls(@PathVariable UUID id,
                                                               @UsuarioActual ContextoUsuario usuario,
-                                                              @RequestBody GenerarUrlsSubidaRequest request
+                                                              @Valid @RequestBody GenerarUrlsSubidaRequest request
                                                               ) {
 
         List<UploadUrlResponse> uploadUrlResponses = imagenService.generarUrlSubida(id, usuario.rol(), usuario.userId(),request.nombresArchivo() );
@@ -36,7 +38,7 @@ public class PropiedadImagenController {
     @PostMapping("/propiedades/{id}/imagenes/confirmar")
     public ResponseEntity<List<ImagenResponse>> confirmarImagenes(@PathVariable UUID id,
                                                                   @UsuarioActual ContextoUsuario usuario,
-                                                                  @RequestBody List<ConfirmarImagenRequest> imagenRequests) {
+                                                                  @RequestBody @NotEmpty  List<@Valid ConfirmarImagenRequest> imagenRequests) {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 imagenService.confirmarImagenes(

@@ -27,12 +27,10 @@ public record ActualizarPropiedadRequest(
 
         @DecimalMin(value = "-90.0")
         @DecimalMax(value = "90.0")
-        @NotNull
         Double latitud,
 
         @DecimalMin(value = "-180.0")
         @DecimalMax(value = "180.0")
-        @NotNull
         Double longitud,
 
         Map<String, Object> caracteristicas

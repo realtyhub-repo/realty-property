@@ -68,12 +68,19 @@ public class PropiedadImagenService {
         if (!esDueno && !esAdmin)
             throw new AccesoNoAutorizadoException("No tienes permiso sobre esta propiedad");
 
+
+        String prefijo = "propiedades/"+propiedadId+"/";
+        boolean keyAjena = requests.stream().anyMatch(r->!r.key().startsWith(prefijo));
+
+        if (keyAjena)
+            throw new AccesoNoAutorizadoException("Una o más imágenes no pertenecen a esta propiedad");
+
         long cantidadPortadas = requests.stream()
                 .filter(ConfirmarImagenRequest::esPortada)
                 .count();
 
         if (cantidadPortadas > 1)
-            throw new ErrorAlmacenamientoException("Solo una imagen puede ser portada");
+            throw new PortadaMultipleException("Solo una imagen puede ser portada");
 
         if (cantidadPortadas == 1) {
             imagenRepository.desmarcarPortadaActual(propiedadId);
