@@ -23,9 +23,9 @@ spring:
         retry:
           enabled: true
           initial-interval: 2s
-          max-attempts: 5
           multiplier: 2
           max-interval: 30s
+          max-retries: 5
 
   jpa:
 
