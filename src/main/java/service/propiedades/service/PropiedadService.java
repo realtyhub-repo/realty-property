@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import service.propiedades.dto.event.TipoContrato;
 import service.propiedades.dto.internal.PropiedadFiltros;
 import service.propiedades.dto.internal.RolUsuario;
 import service.propiedades.dto.request.ActualizarPropiedadRequest;
@@ -42,6 +43,7 @@ public class PropiedadService {
     private final UsuarioClientService usuarioClientService;
     private final StringRedisTemplate redisTemplate;
     private final PropiedadImagenRepository propiedadImagenRepository;
+    private final PropiedadEventPublisher eventPublisher;
 
     @Value("${R2_URL}")
     private String urlBase;
@@ -196,9 +198,32 @@ public class PropiedadService {
 
     public void cambiarEstado(UUID id, EstadoComercial nuevo){
         Propiedad propiedad = buscarPorId(id);
+        EstadoComercial anterior = propiedad.getEstadoComercial();
+
+        if (anterior == nuevo)
+            return;
+
         propiedad.setEstadoComercial(nuevo);
         propiedadRepository.save(propiedad);
-        log.info("publica evento");
+        eventPublisher.publicarEstadoCambiado(propiedad.getId(), anterior, nuevo);
+    }
+
+    public void aplicarContratoFirmado(UUID propiedadId, TipoContrato tipo) {
+        EstadoComercial destino = switch (tipo) {
+            case COMPRAVENTA -> EstadoComercial.VENDIDO;
+            case ALQUILER -> EstadoComercial.ALQUILADO;
+            case ARRAS -> EstadoComercial.RESERVADO;
+        };
+
+        cambiarEstado(propiedadId, destino);
+    }
+
+    public void revertirPorContratoCancelado(UUID propiedadId) {
+        cambiarEstado(propiedadId, EstadoComercial.DISPONIBLE);
+    }
+
+    public PropiedadInternalResponse obtenerParaContrato(UUID id) {
+        return PropiedadInternalResponse.from(buscarPorId(id));
     }
 
 
